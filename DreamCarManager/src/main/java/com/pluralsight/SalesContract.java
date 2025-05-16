@@ -73,5 +73,9 @@ public abstract class SalesContract {
      * @return The monthly payment as a BigDecimal, appropriately scaled, or BigDecimal.ZERO.
      */
     public abstract BigDecimal getMonthlyPayment(); // <<<< CORRECTED: Returns BigDecimal
+
+    public boolean isFinanced() {
+        return true;
+    }
 }
 

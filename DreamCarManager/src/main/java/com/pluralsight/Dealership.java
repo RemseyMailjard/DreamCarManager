@@ -373,8 +373,5 @@ public class Dealership {
                 '}';
     }
 
-    // equals() and hashCode() could be implemented if Dealership objects
-    // need to be compared or used in hash-based collections.
-    // Typically, this might be based on a unique dealership ID or name/address combination.
-    // For this example, we'll omit them for brevity unless specifically required.
+
 }

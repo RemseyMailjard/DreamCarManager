@@ -1,65 +1,77 @@
 package com.pluralsight;
 
-public class SalesContract extends Contract {
-    private final double salesTaxRate = 0.05;
-    private final double recordingFee = 100.00;
-    private final double processingFee;
-    private boolean isFinanced;
+import java.math.BigDecimal; // <<<< IMPORTANT: BigDecimal import
+import java.util.Objects;
 
-    public SalesContract(String date, String customerName, String customerEmail, Vehicle vehicleSold, boolean isFinanced) {
-        super(date, customerName, customerEmail, vehicleSold);
-        this.isFinanced = isFinanced;
+public abstract class SalesContract {
+    protected String date;
+    protected String customerName;
+    protected String customerEmail;
+    protected Vehicle vehicleSold; // The vehicle associated with this contract
 
-        // Set processing fee based on vehicle price
-        if (vehicleSold.getPrice() >= 10000) {
-            this.processingFee = 495.00;
-        } else {
-            this.processingFee = 295.00;
+    /**
+     * Constructs a base Contract.
+     *
+     * @param date          The date of the contract. Must not be null or blank.
+     * @param customerName  The name of the customer. Must not be null or blank.
+     * @param customerEmail The email of the customer. Must not be null or blank.
+     * @param vehicleSold   The vehicle involved in the contract. Must not be null.
+     * @throws NullPointerException     if any parameter (except potentially customerEmail if allowed) is null.
+     * @throws IllegalArgumentException if any string parameter is blank.
+     */
+    public SalesContract(String date, String customerName, String customerEmail, Vehicle vehicleSold) {
+        Objects.requireNonNull(date, "Contract date cannot be null.");
+        if (date.trim().isEmpty()) {
+            throw new IllegalArgumentException("Contract date cannot be blank.");
         }
-    }
+        this.date = date.trim();
 
-    @Override
-    public double getTotalPrice() {
-        double price = getVehicleSold().getPrice();
-        double tax = price * salesTaxRate;
-        return price + tax + recordingFee + processingFee;
-    }
-
-    @Override
-    public double getMonthlyPayment() {
-        if (!isFinanced) {
-            return 0.0;
+        Objects.requireNonNull(customerName, "Customer name cannot be null.");
+        if (customerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be blank.");
         }
+        this.customerName = customerName.trim();
 
-        double loanAmount = getTotalPrice();
-        double interestRate;
-        int termMonths;
-
-        if (getVehicleSold().getPrice() >= 10000) {
-            interestRate = 0.0425;
-            termMonths = 48;
-        } else {
-            interestRate = 0.0525;
-            termMonths = 24;
+        Objects.requireNonNull(customerEmail, "Customer email cannot be null.");
+        if (customerEmail.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer email cannot be blank.");
         }
+        this.customerEmail = customerEmail.trim();
 
-        double monthlyRate = interestRate / 12.0;
-        return (loanAmount * monthlyRate) / (1 - Math.pow(1 + monthlyRate, -termMonths));
+        this.vehicleSold = Objects.requireNonNull(vehicleSold, "Vehicle sold cannot be null for a contract.");
     }
 
-    public boolean isFinanced() {
-        return isFinanced;
+    // Getters
+    public String getDate() {
+        return date;
     }
 
-    public double getSalesTaxAmount() {
-        return getVehicleSold().getPrice() * salesTaxRate;
+    public String getCustomerName() {
+        return customerName;
     }
 
-    public double getRecordingFee() {
-        return recordingFee;
+    public String getCustomerEmail() {
+        return customerEmail;
     }
 
-    public double getProcessingFee() {
-        return processingFee;
+    public Vehicle getVehicleSold() {
+        return vehicleSold;
     }
+
+    /**
+     * Calculates the total price associated with this contract.
+     * This typically includes the vehicle's price plus any contract-specific fees or taxes.
+     *
+     * @return The total price as a BigDecimal, appropriately scaled.
+     */
+    public abstract BigDecimal getTotalPrice(); // <<<< CORRECTED: Returns BigDecimal
+
+    /**
+     * Calculates the monthly payment for this contract, if applicable.
+     * For contracts without financing, this might return BigDecimal.ZERO.
+     *
+     * @return The monthly payment as a BigDecimal, appropriately scaled, or BigDecimal.ZERO.
+     */
+    public abstract BigDecimal getMonthlyPayment(); // <<<< CORRECTED: Returns BigDecimal
 }
+

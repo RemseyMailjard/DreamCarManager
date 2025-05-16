@@ -7,41 +7,39 @@ import java.time.Year; // For year validation
 import java.util.Objects; // For Objects.requireNonNull and Objects.hash
 
 public class Vehicle {
-    private final int vin; // Unique Vehicle Identification Number, immutable
-    private final int year; // Manufacturing year, immutable
-    private final String make; // Manufacturer, immutable
-    private final String model; // Model name, immutable
-    private final String vehicleType; // e.g., Car, Truck, SUV, immutable
-    private final String color; // immutable
+    private final int vin;
+    private final int year;
+    private final String make;
+    private final String model;
+    private final String vehicleType;
+    private final String color;
 
-    private int odometer; // Can change
-    private BigDecimal price; // Can change, use BigDecimal for currency
+    private int odometer;
+    private BigDecimal price; // Use BigDecimal for currency
 
     private static final int MIN_VALID_YEAR = 1886; // First car production year
 
     /**
      * Constructs a new Vehicle.
      *
-     * @param vin         The Vehicle IdentificationNumber.
+     * @param vin         The Vehicle Identification Number.
      * @param year        The manufacturing year. Must be between MIN_VALID_YEAR and current year + 1.
      * @param make        The manufacturer. Must not be null or blank.
      * @param model       The model. Must not be null or blank.
      * @param vehicleType The type of vehicle (e.g., Sedan, SUV). Must not be null or blank.
      * @param color       The color of the vehicle. Must not be null or blank.
-     * @param odometer    The current odometer reading in miles/km. Must not be negative.
-     * @param price       The price of the vehicle. Must not be negative.
+     * @param odometer    The current odometer reading. Must not be negative.
+     * @param price       The price of the vehicle as a double. Must not be negative.
      * @throws IllegalArgumentException if any of the validation rules are violated.
      */
     public Vehicle(int vin, int year, String make, String model, String vehicleType, String color, int odometer, double price) {
-        // VIN is an int here, but in real-world, it's often alphanumeric and String is better.
-        // For this exercise, we'll assume positive VIN.
         if (vin <= 0) {
             throw new IllegalArgumentException("VIN must be a positive number.");
         }
         this.vin = vin;
 
         int currentYear = Year.now().getValue();
-        if (year < MIN_VALID_YEAR || year > currentYear + 1) { // Allow for next year's models
+        if (year < MIN_VALID_YEAR || year > currentYear + 1) {
             throw new IllegalArgumentException("Year must be between " + MIN_VALID_YEAR + " and " + (currentYear + 1) + ".");
         }
         this.year = year;
@@ -51,11 +49,10 @@ public class Vehicle {
         this.vehicleType = validateStringField(vehicleType, "Vehicle Type");
         this.color = validateStringField(color, "Color");
 
-        setOdometer(odometer); // Use setter for validation
-        setPrice(new BigDecimal(price)); // Use setter for validation and convert double to BigDecimal
+        setOdometer(odometer); // Uses setter for its validation
+        setPrice(price);       // Uses setter for its validation (double version)
     }
 
-    // Helper for string validation
     private String validateStringField(String value, String fieldName) {
         Objects.requireNonNull(value, fieldName + " cannot be null.");
         if (value.trim().isEmpty()) {
@@ -65,34 +62,15 @@ public class Vehicle {
     }
 
     // --- Getters for immutable fields ---
-    public int getVin() {
-        return vin;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public String getMake() {
-        return make;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public String getVehicleType() {
-        return vehicleType;
-    }
-
-    public String getColor() {
-        return color;
-    }
+    public int getVin() { return vin; }
+    public int getYear() { return year; }
+    public String getMake() { return make; }
+    public String getModel() { return model; }
+    public String getVehicleType() { return vehicleType; }
+    public String getColor() { return color; }
 
     // --- Getters and Setters for mutable fields ---
-    public int getOdometer() {
-        return odometer;
-    }
+    public int getOdometer() { return odometer; }
 
     /**
      * Sets the odometer reading.
@@ -111,22 +89,42 @@ public class Vehicle {
     }
 
     /**
-     * Sets the price of the vehicle.
-     * @param price The new price. Must not be null or negative.
-     * @throws IllegalArgumentException if price is null or negative.
+     * Sets the price of the vehicle using a BigDecimal.
+     * The price must not be null and must not be negative.
+     *
+     * @param price The new price as BigDecimal.
+     * @throws NullPointerException if price is null.
+     * @throws IllegalArgumentException if price is negative.
      */
     public void setPrice(BigDecimal price) {
         Objects.requireNonNull(price, "Price cannot be null.");
+        // To check if price is negative (price < 0):
+        // price.compareTo(BigDecimal.ZERO) returns:
+        // -1 if price < BigDecimal.ZERO
+        //  0 if price == BigDecimal.ZERO
+        //  1 if price > BigDecimal.ZERO
         if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Price cannot be negative.");
+            throw new IllegalArgumentException("Price cannot be negative. Attempted value: " + price);
         }
-        // Optionally, set a scale for consistent formatting, e.g., 2 decimal places for currency
-        this.price = price.setScale(2, RoundingMode.HALF_UP);
+        this.price = price.setScale(2, RoundingMode.HALF_UP); // Ensure 2 decimal places for currency
     }
 
-    // Overriding equals() and hashCode() is crucial for proper behavior in collections.
-    // Typically, VIN should be enough for equality if it's guaranteed unique.
-    // For this example, we'll consider all immutable fields for equality.
+    /**
+     * Sets the price of the vehicle using a double.
+     * The price must not be negative.
+     *
+     * @param price The new price as a double.
+     * @throws IllegalArgumentException if price is negative.
+     */
+    public void setPrice(double price) {
+        if (price < 0) { // Standard double comparison is fine here
+            throw new IllegalArgumentException("Price cannot be negative. Attempted value: " + price);
+        }
+        // Convert double to BigDecimal. Using String constructor is often preferred for precision,
+        // but BigDecimal.valueOf(double) is also common and generally okay.
+        this.price = BigDecimal.valueOf(price).setScale(2, RoundingMode.HALF_UP);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -134,45 +132,28 @@ public class Vehicle {
         Vehicle vehicle = (Vehicle) o;
         return vin == vehicle.vin &&
                 year == vehicle.year &&
-                odometer == vehicle.odometer && // Including mutable for completeness, though often only immutable fields are used
+                odometer == vehicle.odometer &&
                 Objects.equals(make, vehicle.make) &&
                 Objects.equals(model, vehicle.model) &&
                 Objects.equals(vehicleType, vehicle.vehicleType) &&
                 Objects.equals(color, vehicle.color) &&
-                (price != null && vehicle.price != null ? price.compareTo(vehicle.price) == 0 : price == vehicle.price); // BigDecimal comparison
+                // For BigDecimal, use compareTo for equality check (value equality, ignoring scale differences after setScale)
+                (price != null && vehicle.price != null ? price.compareTo(vehicle.price) == 0 : price == vehicle.price);
     }
 
     @Override
     public int hashCode() {
-        // Use Objects.hash for a convenient way to generate hash codes.
-        // Include the same fields as in equals().
         return Objects.hash(vin, year, make, model, vehicleType, color, odometer, price);
     }
 
-    /**
-     * Returns a string representation of the vehicle.
-     * Example: "Vehicle{VIN=12345, Year=2022, Make='Toyota', Model='Camry', Type='Sedan', Color='Red', Odometer=15000, Price=25000.00}"
-     *
-     * @return A string representation of the vehicle.
-     */
     @Override
     public String toString() {
+        // When formatting BigDecimal as a float (%.2f), it's good practice to call .doubleValue()
+        // or ensure the context handles BigDecimal appropriately. String.format can handle BigDecimal with %f.
+        double priceAsDouble = (this.price != null) ? this.price.doubleValue() : 0.0;
         return String.format(
                 "Vehicle{VIN=%d, Year=%d, Make='%s', Model='%s', Type='%s', Color='%s', Odometer=%d, Price=%.2f}",
-                vin, year, make, model, vehicleType, color, odometer, (price != null ? price : BigDecimal.ZERO)
+                vin, year, make, model, vehicleType, color, odometer, priceAsDouble
         );
-    }
-
-    // --- If you need to update price from a double (e.g., from CSV parsing) ---
-    /**
-     * Sets the price of the vehicle from a double value.
-     * @param price The new price as a double. Must not be negative.
-     * @throws IllegalArgumentException if price is negative.
-     */
-    public void setPrice(double price) {
-        if (price < 0) {
-            throw new IllegalArgumentException("Price cannot be negative.");
-        }
-        this.price = new BigDecimal(price).setScale(2, RoundingMode.HALF_UP);
     }
 }

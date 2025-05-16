@@ -1,12 +1,13 @@
 package com.pluralsight;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Dealership {
     private String name;
     private String address;
     private String phone;
-    private ArrayList<Vehicle> inventory;
+    private List<Vehicle> inventory;
 
     // Constructor
     public Dealership(String name, String address, String phone) {
@@ -41,40 +42,83 @@ public class Dealership {
         this.phone = phone;
     }
 
-    public ArrayList<Vehicle> getAllVehicles() {
+    public List<Vehicle> getAllVehicles() {
         return inventory;
     }
 
+    // Functionaliteit: toevoegen
     public void addVehicle(Vehicle vehicle) {
         inventory.add(vehicle);
     }
 
+    // Functionaliteit: verwijderen
     public void removeVehicle(Vehicle vehicle) {
         inventory.remove(vehicle);
     }
 
-    // De volgende methodes geef je in eerste instantie een lege return (voor fase 1)
-    public ArrayList<Vehicle> getVehiclesByPrice(double min, double max) {
-        return null;
+    // Filteren op prijs
+    public List<Vehicle> getVehiclesByPrice(double min, double max) {
+        List<Vehicle> results = new ArrayList<>();
+        for (Vehicle v : inventory) {
+            if (v.getPrice() >= min && v.getPrice() <= max) {
+                results.add(v);
+            }
+        }
+        return results;
     }
 
-    public ArrayList<Vehicle> getVehiclesByMakeModel(String make, String model) {
-        return null;
+    // Filteren op make/model
+    public List<Vehicle> getVehiclesByMakeModel(String make, String model) {
+        List<Vehicle> results = new ArrayList<>();
+        for (Vehicle v : inventory) {
+            if (v.getMake().equalsIgnoreCase(make) && v.getModel().equalsIgnoreCase(model)) {
+                results.add(v);
+            }
+        }
+        return results;
     }
 
-    public ArrayList<Vehicle> getVehiclesByYear(int minYear, int maxYear) {
-        return null;
+    // Filteren op bouwjaar
+    public List<Vehicle> getVehiclesByYear(int minYear, int maxYear) {
+        List<Vehicle> results = new ArrayList<>();
+        for (Vehicle v : inventory) {
+            if (v.getYear() >= minYear && v.getYear() <= maxYear) {
+                results.add(v);
+            }
+        }
+        return results;
     }
 
-    public ArrayList<Vehicle> getVehiclesByColor(String color) {
-        return null;
+    // Filteren op kleur
+    public List<Vehicle> getVehiclesByColor(String color) {
+        List<Vehicle> results = new ArrayList<>();
+        for (Vehicle v : inventory) {
+            if (v.getColor().equalsIgnoreCase(color)) {
+                results.add(v);
+            }
+        }
+        return results;
     }
 
-    public ArrayList<Vehicle> getVehiclesByMileage(int min, int max) {
-        return null;
+    // Filteren op kilometerstand
+    public List<Vehicle> getVehiclesByMileage(int minMileage, int maxMileage) {
+        List<Vehicle> results = new ArrayList<>();
+        for (Vehicle v : inventory) {
+            if (v.getOdometer() >= minMileage && v.getOdometer() <= maxMileage) {
+                results.add(v);
+            }
+        }
+        return results;
     }
 
-    public ArrayList<Vehicle> getVehiclesByType(String type) {
-        return null;
+    // Filteren op type voertuig
+    public List<Vehicle> getVehiclesByType(String type) {
+        List<Vehicle> results = new ArrayList<>();
+        for (Vehicle v : inventory) {
+            if (v.getVehicleType().equalsIgnoreCase(type)) {
+                results.add(v);
+            }
+        }
+        return results;
     }
 }

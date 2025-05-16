@@ -3,47 +3,72 @@ package com.pluralsight;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+
+import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
+
 public class DealershipFileManager {
-public Dealership getDealership() {
-    Dealership dealership = null;
-    try (BufferedReader reader = new BufferedReader(new FileReader("inventory.csv"))) {
-        String line;
+    private static final String FILE_NAME = "inventory.csv";
 
-        // Read the first line: dealership info
-        if ((line = reader.readLine()) != null) {
-            String[] dealershipInfo = line.split("\\|");
-            String name = dealershipInfo[0];
-            String address = dealershipInfo[1];
-            String phone = dealershipInfo[2];
-            dealership = new Dealership(name, address, phone);
+    // Laadt de dealership + voertuigen uit bestand
+    public Dealership getDealership() {
+        Dealership dealership = null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+            String line;
+
+            // Eerste regel: dealership info
+            if ((line = reader.readLine()) != null) {
+                String[] fields = line.split("\\|");
+                String name = fields[0];
+                String address = fields[1];
+                String phone = fields[2];
+
+                dealership = new Dealership(name, address, phone);
+            }
+
+            // Volgende regels: voertuigen
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split("\\|");
+
+                int vin = Integer.parseInt(fields[0]);
+                int year = Integer.parseInt(fields[1]);
+                String make = fields[2];
+                String model = fields[3];
+                String type = fields[4];
+                String color = fields[5];
+                int odometer = Integer.parseInt(fields[6]);
+                double price = Double.parseDouble(fields[7]);
+
+                Vehicle vehicle = new Vehicle(vin, year, make, model, type, color, odometer, price);
+                dealership.addVehicle(vehicle);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Fout bij lezen van bestand: " + e.getMessage());
         }
 
-        // Read the rest: vehicle lines
-        while ((line = reader.readLine()) != null) {
-            String[] parts = line.split("\\|");
-            if (parts.length < 8) continue; // skip invalid lines
-
-            int vin = Integer.parseInt(parts[0]);
-            int year = Integer.parseInt(parts[1]);
-            String make = parts[2];
-            String model = parts[3];
-            String type = parts[4];
-            String color = parts[5];
-            int odometer = Integer.parseInt(parts[6]);
-            double price = Double.parseDouble(parts[7]);
-
-            Vehicle vehicle = new Vehicle(vin, year, make, model, type, color, odometer, price);
-            dealership.addVehicle(vehicle);
-        }
-
-    } catch (IOException e) {
-        System.out.println("Error reading inventory file: " + e.getMessage());
+        return dealership;
     }
 
-    return dealership;
-}
-
+    // Schrijft de volledige dealership + voertuigen terug naar bestand
     public void saveDealership(Dealership dealership) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
+            // Eerste regel: dealership info
+            writer.write(dealership.getName() + "|" + dealership.getAddress() + "|" + dealership.getPhone());
+            writer.newLine();
+
+            // Elke voertuig op nieuwe regel
+            for (Vehicle v : dealership.getAllVehicles()) {
+                String line = v.getVin() + "|" + v.getYear() + "|" + v.getMake() + "|" + v.getModel() + "|" +
+                        v.getVehicleType() + "|" + v.getColor() + "|" + v.getOdometer() + "|" + v.getPrice();
+                writer.write(line);
+                writer.newLine();
+            }
+
+        } catch (IOException e) {
+            System.out.println("Fout bij schrijven naar bestand: " + e.getMessage());
+        }
     }
 }

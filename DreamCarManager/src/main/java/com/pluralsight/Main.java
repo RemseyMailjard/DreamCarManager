@@ -5,7 +5,7 @@ public class Main {
 
 
         UserInterface ui = new UserInterface();
-        ui.display();       System.out.println("Hello world!");
+        ui.display();
 
     }
 }

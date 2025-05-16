@@ -5,8 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+
 
 public class DealershipFileManager {
     private static final String FILE_NAME = "inventory.csv";
@@ -15,38 +14,47 @@ public class DealershipFileManager {
     public Dealership getDealership() {
         Dealership dealership = null;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(FILE_NAME);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+
             String line;
 
-            // Eerste regel: dealership info
             if ((line = reader.readLine()) != null) {
                 String[] fields = line.split("\\|");
-                String name = fields[0];
-                String address = fields[1];
-                String phone = fields[2];
-
-                dealership = new Dealership(name, address, phone);
+                if (fields.length >= 3) {
+                    String name = fields[0];
+                    String address = fields[1];
+                    String phone = fields[2];
+                    dealership = new Dealership(name, address, phone);
+                }
             }
 
-            // Volgende regels: voertuigen
+            if (dealership == null) {
+                System.out.println("Missing or invalid dealership info. Creating default.");
+                dealership = new Dealership("Unknown", "Unknown", "N/A");
+            }
+
             while ((line = reader.readLine()) != null) {
                 String[] fields = line.split("\\|");
+                if (fields.length == 8) {
+                    int vin = Integer.parseInt(fields[0]);
+                    int year = Integer.parseInt(fields[1]);
+                    String make = fields[2];
+                    String model = fields[3];
+                    String type = fields[4];
+                    String color = fields[5];
+                    int odometer = Integer.parseInt(fields[6]);
+                    double price = Double.parseDouble(fields[7]);
 
-                int vin = Integer.parseInt(fields[0]);
-                int year = Integer.parseInt(fields[1]);
-                String make = fields[2];
-                String model = fields[3];
-                String type = fields[4];
-                String color = fields[5];
-                int odometer = Integer.parseInt(fields[6]);
-                double price = Double.parseDouble(fields[7]);
-
-                Vehicle vehicle = new Vehicle(vin, year, make, model, type, color, odometer, price);
-                dealership.addVehicle(vehicle);
+                    Vehicle vehicle = new Vehicle(vin, year, make, model, type, color, odometer, price);
+                    dealership.addVehicle(vehicle);
+                } else {
+                    System.out.println("Invalid vehicle line: " + line);
+                }
             }
 
-        } catch (IOException e) {
-            System.out.println("Fout bij lezen van bestand: " + e.getMessage());
+        } catch (IOException | NullPointerException e) {
+            System.out.println("Error reading from resource file: " + e.getMessage());
         }
 
         return dealership;
